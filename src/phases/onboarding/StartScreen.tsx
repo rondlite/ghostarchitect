@@ -495,7 +495,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
           </div>
           
           <div className="text-center font-mono text-[9px] tracking-widest text-white/20 uppercase">
-            &copy; 2026 GHOST ARCHITECT &middot; DEMANDCLUSTER &middot; TECHNICAL SIMULATION v2.4.0
+            &copy; 2026 Ghost Architect &middot; Technical Simulation v2.4.0
             &nbsp;&middot;&nbsp;
             <a
               href="/about"

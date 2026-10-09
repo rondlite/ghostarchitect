@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-01
 **Status:** Approved
-**Author:** Ron van Etten / Demandcluster B.V.
+**Author:** Ron van Etten
 
 ---
 
@@ -16,7 +16,7 @@ Trainer-only B2B terms. Player-facing privacy is already handled by the in-game 
 
 ## Legal Entity
 
-**Demandcluster B.V.**, Diemen, Netherlands
+**Ron van Etten**, Hellevoetsluis, Netherlands
 Contact: enquiries@ghostarchitectgame.com
 Governing law: Netherlands, jurisdiction: Amsterdam
 
@@ -35,7 +35,7 @@ Governing law: Netherlands, jurisdiction: Amsterdam
 9. **Termination** — Demandcluster may terminate for violations; trainer may delete account and all data at any time (instant)
 10. **Governing Law & Jurisdiction** — Netherlands, Amsterdam courts
 11. **Changes** — Effective date updated; continued use = acceptance
-12. **Contact** — Demandcluster B.V., Diemen, enquiries@ghostarchitectgame.com
+12. **Contact** — Ron van Etten, Hellevoetsluis, enquiries@ghostarchitectgame.com
 
 ## Sub-Processors
 
