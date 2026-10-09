@@ -27,6 +27,14 @@
   --accent-hover:     #1e4cc9;
   --accent-subtle:    rgba(36,93,221,0.10);
   --accent-ring:      rgba(36,93,221,0.35);
+  /* Disabled controls: neutral fill + readable text (WCAG AA on light bg);
+     replaces opacity-based dimming that washed buttons out to ~1.5:1 */
+  --control-disabled-bg:   #d5dbe3;
+  --control-disabled-text: #4a5568;
+  /* Pre-login "boot" screens (start/login/mfa/sim-intro) are intentionally
+     dark terminal-style regardless of theme; they must not follow the light
+     corporate --bg-primary (white text on light blue = unreadable). */
+  --bg-boot:          #0b1220;
   --border:           rgba(220,227,237,0.60);
   --border-strong:    rgba(220,227,237,0.80);
   
@@ -87,6 +95,9 @@
   --accent-hover:     #9feeba;
   --accent-subtle:    rgba(134,233,173,0.15);
   --accent-ring:      rgba(134,233,173,0.40);
+  --control-disabled-bg:   #1c2a22;
+  --control-disabled-text: #7d9488;
+  --bg-boot:          #0b1220;
   --border:           rgba(56,84,66,0.40);
   --border-strong:    rgba(56,84,66,0.60);
   

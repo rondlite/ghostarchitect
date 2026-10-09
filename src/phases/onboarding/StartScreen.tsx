@@ -145,7 +145,7 @@ function PrivacyModal({ onAccept, onNoStore }: PrivacyModalProps) {
           <div className="inline-block px-3 py-1 rounded-full bg-[var(--bg-glass)] border border-[var(--border)] text-[10px] text-[var(--accent)] tracking-[0.3em] font-bold mb-3 uppercase">
             System Protocol
           </div>
-          <h2 className="text-xl font-bold tracking-tight text-white uppercase">
+          <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] uppercase">
             Privacy &amp; Data Security
           </h2>
         </div>
@@ -185,8 +185,9 @@ function PrivacyModal({ onAccept, onNoStore }: PrivacyModalProps) {
             <div
               className="w-5 h-5 border-2 rounded transition-all flex items-center justify-center"
               style={{
-                borderColor: simulationChecked ? "var(--accent)" : "var(--border-strong)",
-                background: simulationChecked ? "var(--accent)" : "transparent"
+                borderColor: simulationChecked ? "var(--accent)" : "#94a3b8",
+                background: simulationChecked ? "var(--accent)" : "#ffffff",
+                boxShadow: "0 0 0 1px rgba(148,163,184,0.5)"
               }}
             >
               {simulationChecked && (
@@ -209,14 +210,14 @@ function PrivacyModal({ onAccept, onNoStore }: PrivacyModalProps) {
               onAccept();
             }}
             disabled={!simulationChecked}
-            className="w-full bg-[var(--accent)] text-black font-bold py-3.5 rounded-xl text-xs tracking-[0.2em] hover:brightness-110 transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] disabled:opacity-30 disabled:cursor-not-allowed uppercase"
+            className="w-full bg-[var(--accent)] text-black font-bold py-3.5 rounded-xl text-xs tracking-[0.2em] hover:brightness-110 transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] disabled:bg-[var(--control-disabled-bg)] disabled:text-[var(--control-disabled-text)] disabled:shadow-none disabled:cursor-not-allowed uppercase"
           >
             Acknowledge &amp; Enter
           </button>
 
           <button
             onClick={onNoStore}
-            className="w-full text-[var(--text-muted)] text-[10px] tracking-widest hover:text-white transition-colors py-2 uppercase"
+            className="w-full text-[var(--text-muted)] text-[11px] tracking-widest hover:text-[var(--text-secondary)] transition-colors py-2 uppercase"
           >
             Play Ephemerally (No Storage)
           </button>
@@ -349,7 +350,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
         )}
       </AnimatePresence>
 
-      <div className="relative h-[100dvh] overflow-y-auto bg-[var(--bg-primary)] px-6">
+      <div className="relative h-[100dvh] overflow-y-auto bg-[var(--bg-boot)] px-6">
         {/* Spotlight background */}
         <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
           {/* Radial spotlight behind logo area */}
@@ -461,7 +462,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
                   <button
                     type="submit"
                     disabled={loading || inviteCode.trim().length < 6}
-                    className="w-full bg-[var(--accent)] text-black font-bold py-4 rounded-xl text-xs tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] disabled:opacity-20 disabled:cursor-not-allowed uppercase"
+                    className="w-full bg-[var(--accent)] text-black font-bold py-4 rounded-xl text-xs tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] disabled:bg-[var(--control-disabled-bg)] disabled:text-[var(--control-disabled-text)] disabled:shadow-none disabled:cursor-not-allowed uppercase"
                   >
                     {loading ? "INITIALIZING..." : "COMMENCE SIMULATION"}
                   </button>

@@ -75,3 +75,13 @@ All game content (emails, log entries, DM scripts, LOLBins) lives in `src/conten
 The app deploys to a private Rancher RKE cluster. Kubernetes manifests are in `k8s/`. The `k8s/secret.yaml` contains placeholder values — fill in `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET` before deploying. The CI/CD pipeline (`.github/workflows/ci.yml`) builds the Docker image, pushes to a private registry, and applies manifests on push to `main`. Required GitHub secrets: `REGISTRY`, `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`, `KUBECONFIG`.
 
 PostgreSQL runs in-cluster. `DATABASE_URL` should point to the CloudNativePG service: `postgresql://user:pass@postgres-service.namespace.svc.cluster.local:5432/ghostarchitect`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

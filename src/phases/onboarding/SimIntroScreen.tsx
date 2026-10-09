@@ -74,7 +74,7 @@ export function SimIntroScreen({ onComplete }: SimIntroScreenProps) {
   return (
     <div
       className="fixed inset-0 flex flex-col items-center justify-center"
-      style={{ background: "var(--bg-primary)" }}
+      style={{ background: "var(--bg-boot)" }}
     >
       <AnimatePresence mode="wait">
         {phase === "typewriter" && (

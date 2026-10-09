@@ -67,7 +67,7 @@ export function MFAPuzzle({ onComplete }: MFAPuzzleProps) {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center px-6 py-12 overflow-hidden bg-[var(--bg-primary)]">
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-6 py-12 overflow-hidden bg-[var(--bg-boot)]">
       {/* Background elements */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
         <div 
