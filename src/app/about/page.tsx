@@ -99,17 +99,7 @@ export default function AboutPage() {
             Who Built It
           </h2>
           <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
-            Designed and developed by{" "}
-            <a
-              href="https://demandcluster.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:text-white transition-colors"
-              style={{ color: "rgba(255,255,255,0.9)" }}
-            >
-              Demandcluster
-            </a>
-            . Development by Ron van Etten. Quality assurance by Mendel Douma.
+            Designed and developed by Ron van Etten. Quality assurance by Mendel Douma.
           </p>
         </motion.section>
 

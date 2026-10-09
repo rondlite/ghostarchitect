@@ -191,18 +191,6 @@ export function IncidentReport({ ending, verdict, color, teamName, playerHandle,
         <div style={{ color: "rgba(255,255,255,0.2)" }} className="text-[10px] uppercase tracking-[3px]">
           A contribution to the cybersecurity community
         </div>
-        <div style={{ color: "rgba(255,255,255,0.3)" }} className="text-xs">
-          Brought to you by{" "}
-          <a
-            href="https://demandcluster.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2 transition-colors hover:text-white"
-            style={{ color: "rgba(255,255,255,0.5)" }}
-          >
-            Demandcluster
-          </a>
-        </div>
         <div style={{ color: "rgba(255,255,255,0.2)" }} className="text-[11px]">
           Developed by Ron van Etten &middot; Tested by Mendel Douma
         </div>
