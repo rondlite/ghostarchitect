@@ -176,6 +176,7 @@ export function WindowsShell({
       isRunning: true,
       isActive: activeWindowId === window.id,
       isMinimized: minimizedWindows.has(window.id),
+      kind: "window",
       onClick: () => {
         if (minimizedWindows.has(window.id)) {
           setMinimizedWindows(prev => {
@@ -216,6 +217,7 @@ export function WindowsShell({
         isRunning: true,
         isActive: activeWindowId === "messages",
         isMinimized: minimizedWindows.has("messages"),
+        kind: "panel",
         onClick: () => {
           setActiveWindowId("messages");
         },
@@ -251,6 +253,7 @@ export function WindowsShell({
       isRunning: true,
       isActive: !!panelOpen.scoreboard,
       isMinimized: false,
+      kind: "panel",
       onClick: onAppClick ? () => onAppClick?.("scoreboard") : () => {},
       onMinimize: () => {},
       onRestore: () => {},
@@ -268,6 +271,7 @@ export function WindowsShell({
         isRunning: true,
         isActive: !!panelOpen.wiki,
         isMinimized: false,
+        kind: "panel",
         onClick: onAppClick ? () => onAppClick?.("wiki") : () => {},
         onMinimize: () => {},
         onRestore: () => {},

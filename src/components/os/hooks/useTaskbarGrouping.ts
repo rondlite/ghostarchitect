@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import type { TaskbarApp } from "../Taskbar";
 
 export interface GroupedApp {
   id: string;
@@ -12,7 +13,7 @@ export interface GroupedApp {
 }
 
 export function useTaskbarGrouping(
-  apps: Array<{ id: string; label: string; icon: React.ReactNode; kind?: "window" | "panel" }>,
+  apps: TaskbarApp[],
   availableWindowIds: string[],
   activeApp: string,
   groupingThreshold = 6
@@ -32,16 +33,16 @@ export function useTaskbarGrouping(
       };
     }
 
-    // Group by similar app types
+    // Group by similar app types (for now, group individual apps with same title)
     const appGroups: Map<string, GroupedApp> = new Map();
     
     windowApps.forEach(app => {
-      // Simple grouping by app type (you can make this smarter)
-      const groupId = app.id; // For now, group by individual app
+      // Group by app title (simple approach for now)
+      const groupId = app.title;
       if (!appGroups.has(groupId)) {
         appGroups.set(groupId, {
           id: groupId,
-          label: app.label,
+          label: app.title,
           icon: app.icon,
           kind: app.kind,
           windows: [],
@@ -52,7 +53,7 @@ export function useTaskbarGrouping(
       const group = appGroups.get(groupId)!;
       group.windows.push({
         id: app.id,
-        title: app.label,
+        title: app.title,
         focused: activeApp === app.id,
       });
       group.count = group.windows.length;
