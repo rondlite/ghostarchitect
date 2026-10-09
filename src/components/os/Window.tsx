@@ -46,6 +46,16 @@ export function Window({
   const [isFocused, setIsFocused] = useState(isActive);
   const windowRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  // Active drag listeners, so they can always be removed (end-drag OR unmount mid-drag)
+  const dragCleanupRef = useRef<(() => void) | null>(null);
+
+  // Remove any live drag listeners when the component unmounts mid-drag
+  useEffect(() => {
+    return () => {
+      dragCleanupRef.current?.();
+      dragCleanupRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     setIsMaximizedState(isMaximized);
@@ -91,21 +101,22 @@ export function Window({
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
-      
+
       const desktop = document.querySelector('.desktop');
       if (!desktop) return;
 
       const desktopRect = desktop.getBoundingClientRect();
       const newX = e.clientX - startX;
       const newY = e.clientY - startY;
-      
-      // Keep window within desktop bounds
-      const maxX = desktopRect.width - (isMobile ? 0 : size.width);
+
+      // Keep window within desktop bounds (read live viewport state, not stale closure)
+      const mobile = window.innerWidth < 768;
+      const maxX = desktopRect.width - (mobile ? 0 : size.width);
       const maxY = desktopRect.height - 45; // Account for title bar height
-      
+
       setPosition({
-        x: isMobile ? 0 : Math.max(0, Math.min(newX, maxX)),
-        y: isMobile ? 0 : Math.max(0, Math.min(newY, maxY)),
+        x: mobile ? 0 : Math.max(0, Math.min(newX, maxX)),
+        y: mobile ? 0 : Math.max(0, Math.min(newY, maxY)),
       });
     };
 
@@ -113,19 +124,16 @@ export function Window({
       setIsDragging(false);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      dragCleanupRef.current = null;
     };
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  // Clean up drag listeners on unmount
-  useEffect(() => {
-    return () => {
-      document.removeEventListener('mousemove', () => {});
-      document.removeEventListener('mouseup', () => {});
+    dragCleanupRef.current = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, []);
+  };
 
   // Focus ring animation
   const focusRingAnimation = {
