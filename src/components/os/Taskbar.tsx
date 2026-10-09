@@ -92,6 +92,11 @@ export function Taskbar({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape' && startMenuOpen) {
       onStartMenuToggle?.(false);
+      // Focus back on the Start button when menu closes with Escape
+      const startButton = document.querySelector('.taskbar-start-button');
+      if (startButton instanceof HTMLElement) {
+        startButton.focus();
+      }
     }
   };
 

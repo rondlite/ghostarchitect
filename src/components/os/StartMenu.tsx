@@ -42,6 +42,11 @@ export function StartMenu({
     // Close when clicking outside the menu
     if (e.target === e.currentTarget) {
       onClose?.();
+      // Focus back on the Start button when menu closes with backdrop click
+      const startButton = document.querySelector('.taskbar-start-button');
+      if (startButton instanceof HTMLElement) {
+        startButton.focus();
+      }
     }
   };
 

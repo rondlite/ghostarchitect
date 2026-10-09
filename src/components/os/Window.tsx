@@ -12,7 +12,7 @@ export interface WindowProps {
   style?: React.CSSProperties;
   onClose?: () => void;
   onMinimize?: () => void;
-  onMaximize?: () => void;
+  onMaximize?: (newState: boolean) => void;
   isActive?: boolean;
   isMaximized?: boolean;
   defaultPosition?: { x: number; y: number };
@@ -71,9 +71,7 @@ export function Window({
   const handleMaximize = () => {
     const newState = !isMaximizedState;
     setIsMaximizedState(newState);
-    if (typeof onMaximize === "function") {
-      (onMaximize as any)(newState);
-    }
+    onMaximize?.(newState);
   };
 
   // Handle close
@@ -121,6 +119,14 @@ export function Window({
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  // Clean up drag listeners on unmount
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', () => {});
+      document.removeEventListener('mouseup', () => {});
+    };
+  }, []);
+
   // Focus ring animation
   const focusRingAnimation = {
     initial: { opacity: 0 },
@@ -131,8 +137,27 @@ export function Window({
     exit: { opacity: 0 }
   };
 
-  // Check if we're on mobile
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Update mobile detection on resize and initial mount
+  useEffect(() => {
+    const updateMobileState = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth < 768);
+      }
+    };
+
+    // Initial detection
+    updateMobileState();
+
+    // Handle resize events
+    const handleResize = () => {
+      updateMobileState();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <AnimatePresence>

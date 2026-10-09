@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ReactNode } from 'react';
+import { useState, useEffect, useLayoutEffect, ReactNode } from 'react';
 
 export interface DesktopIcon {
   id: string;
@@ -31,20 +31,38 @@ export function Desktop({
   corporateSessionInfo = "Workstation 07 · Corporate environment",
   breachSessionInfo = "Incident workspace · Training session",
 }: DesktopProps) {
-  // Determine which session info to show based on theme
   const [sessionText, setSessionText] = useState(corporateSessionInfo);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // This would typically come from a context or theme provider
+  // Get current theme from DOM with proper hydration
   const getTheme = () => {
-    // In a real implementation, this would come from ThemeProvider
-    return 'corporate'; // Default to corporate
+    if (typeof window === 'undefined') return 'corporate';
+    return document.documentElement.dataset.theme || 'corporate';
   };
 
-  // Update session info when theme changes
-  if (typeof window !== 'undefined') {
-    const theme = getTheme();
-    setSessionText(theme === 'corporate' ? corporateSessionInfo : breachSessionInfo);
-  }
+  // Update session text when theme changes (using observer for better performance)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const updateSessionText = () => {
+      const theme = getTheme();
+      setSessionText(theme === 'corporate' ? corporateSessionInfo : breachSessionInfo);
+    };
+
+    // Initial update
+    updateSessionText();
+
+    // Set up observer for theme changes
+    const observer = new MutationObserver(updateSessionText);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+
+    setIsHydrated(true);
+
+    return () => observer.disconnect();
+  }, [corporateSessionInfo, breachSessionInfo]);
 
   return (
     <div className={`desktop ${className}`}>
