@@ -1,4 +1,5 @@
 import { requirePrisma } from './prisma';
+import type { Prisma } from '@prisma/client';
 import { OpenAIClient, AuditClient } from './openaiAI';
 import type { Email, LogEntry, LOLBin, WiFiNetwork } from '@/content/types';
 
@@ -199,12 +200,12 @@ export class ContentPoolManager {
       const phishingUrl = `https://${fakeBase}-secure-auth.net/login/verify`;
       const safeUrl = `https://kb.${options.fakeDomain}/security/verify-identity`;
       
-      const replaceLinks = (val: any): any => {
+      const replaceLinks = (val: unknown): unknown => {
         if (!val) return val;
         if (typeof val === 'string') {
           return val.replace(/{{phishing-link}}|\[phishing-link\]/gi, branded.isPhishing ? phishingUrl : safeUrl);
         }
-        if (Array.isArray(val)) return val.map(replaceLinks);
+        if (Array.isArray(val)) return val.map((v) => replaceLinks(v));
         if (typeof val === 'object') {
           const newObj = { ...val } as Record<string, unknown>;
           for (const key of Object.keys(newObj)) {
@@ -430,13 +431,13 @@ export class ContentPoolManager {
       if (batch.lolbins.length > 0) entries.push({ type: 'LOLBIN_BATCH', data: batch.lolbins });
       if (batch.wifi.length > 0) entries.push({ type: 'WIFI_BATCH', data: batch.wifi });
       for (const entry of entries) {
-        const item = await prisma.contentPool.create({ data: { type: entry.type, data: entry.data as any, audited: false } });
+        const item = await prisma.contentPool.create({ data: { type: entry.type, data: entry.data as Prisma.InputJsonValue, audited: false } });
         this.auditItem(item.id, entry.type, entry.data);
       }
     } catch (e) { console.error('[PoolManager] Refill error:', e); }
   }
 
-  private async auditItem(id: string, type: string, data: any) {
+  private async auditItem(id: string, type: string, data: unknown) {
     if (!this.auditor) return;
     const prisma = requirePrisma();
     try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useScoreStore } from "@/stores/scoreStore";
 import { useNarrativeStore } from "@/stores/narrativeStore";
@@ -35,7 +35,9 @@ export function EvilTwinWiFi({ onComplete, networks }: EvilTwinWiFiProps) {
   const fakeDomain = useGameStore((s) => s.fakeDomain);
   const teamName = useGameStore((s) => s.teamName);
 
-  const accessPoints = useMemo<WiFiAP[]>(() => {
+  // Lazy useState instead of useMemo: Math.random() is impure and must not
+  // run during render; the initializer runs once on mount.
+  const [accessPoints] = useState<WiFiAP[]>(() => {
     // The challenge always shows exactly 2 APs with the same corporate SSID:
     // one legitimate (WPA2-Enterprise, normal signal) and one evil twin (WPA2-PSK, strong signal).
     // AI-generated network data provides indicators/hints but the core pair is always built from the team name.
@@ -121,7 +123,7 @@ export function EvilTwinWiFi({ onComplete, networks }: EvilTwinWiFiProps) {
       [all[i], all[j]] = [all[j], all[i]];
     }
     return all;
-  }, [networks, teamName]);
+  });
 
   useEffect(() => {
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });

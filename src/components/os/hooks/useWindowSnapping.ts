@@ -39,6 +39,58 @@ export function useWindowSnapping(
   // Check if window is in mobile view
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
+  const checkSnapZones = useCallback((clientX: number, clientY: number) => {
+    if (!windowRef.current) return;
+
+    const windowRect = windowRef.current.getBoundingClientRect();
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    const snapZones: SnapZone[] = [
+      // Left edge - half screen
+      { area: "left", x: 0, y: 0, width: screenWidth / 2, height: screenHeight },
+      // Right edge - half screen  
+      { area: "right", x: screenWidth / 2, y: 0, width: screenWidth / 2, height: screenHeight },
+      // Top edge - maximize
+      { area: "top", x: 0, y: 0, width: screenWidth, height: screenHeight },
+      // Top-left corner - quarter screen
+      { area: "top-left", x: 0, y: 0, width: screenWidth / 2, height: screenHeight / 2 },
+      // Top-right corner - quarter screen
+      { area: "top-right", x: screenWidth / 2, y: 0, width: screenWidth / 2, height: screenHeight / 2 },
+      // Bottom-left corner - quarter screen
+      { area: "bottom-left", x: 0, y: screenHeight / 2, width: screenWidth / 2, height: screenHeight / 2 },
+      // Bottom-right corner - quarter screen
+      { area: "bottom-right", x: screenWidth / 2, y: screenHeight / 2, width: screenWidth / 2, height: screenHeight / 2 },
+    ];
+
+    let closestSnap: SnapZone | null = null;
+    let minDistance = screenThreshold;
+
+    for (const zone of snapZones) {
+      const distance = Math.sqrt(
+        Math.pow(clientX - (zone.x + zone.width / 2), 2) + 
+        Math.pow(clientY - (zone.y + zone.height / 2), 2)
+      );
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestSnap = zone;
+      }
+    }
+
+    if (closestSnap) {
+      setSnapPreview({
+        area: closestSnap.area,
+        x: closestSnap.x,
+        y: closestSnap.y,
+        width: closestSnap.width,
+        height: closestSnap.height,
+      });
+    } else {
+      setSnapPreview(null);
+    }
+  }, []);
+
   useEffect(() => {
     if (isMobile) {
       setIsSnapped(false);
@@ -109,57 +161,6 @@ export function useWindowSnapping(
     };
   }, [isDragging, snapPreview, onSnap, onRestore, isMobile, gridSize]);
 
-  const checkSnapZones = useCallback((clientX: number, clientY: number) => {
-    if (!windowRef.current) return;
-
-    const windowRect = windowRef.current.getBoundingClientRect();
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-
-    const snapZones: SnapZone[] = [
-      // Left edge - half screen
-      { area: "left", x: 0, y: 0, width: screenWidth / 2, height: screenHeight },
-      // Right edge - half screen  
-      { area: "right", x: screenWidth / 2, y: 0, width: screenWidth / 2, height: screenHeight },
-      // Top edge - maximize
-      { area: "top", x: 0, y: 0, width: screenWidth, height: screenHeight },
-      // Top-left corner - quarter screen
-      { area: "top-left", x: 0, y: 0, width: screenWidth / 2, height: screenHeight / 2 },
-      // Top-right corner - quarter screen
-      { area: "top-right", x: screenWidth / 2, y: 0, width: screenWidth / 2, height: screenHeight / 2 },
-      // Bottom-left corner - quarter screen
-      { area: "bottom-left", x: 0, y: screenHeight / 2, width: screenWidth / 2, height: screenHeight / 2 },
-      // Bottom-right corner - quarter screen
-      { area: "bottom-right", x: screenWidth / 2, y: screenHeight / 2, width: screenWidth / 2, height: screenHeight / 2 },
-    ];
-
-    let closestSnap: SnapZone | null = null;
-    let minDistance = screenThreshold;
-
-    for (const zone of snapZones) {
-      const distance = Math.sqrt(
-        Math.pow(clientX - (zone.x + zone.width / 2), 2) + 
-        Math.pow(clientY - (zone.y + zone.height / 2), 2)
-      );
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestSnap = zone;
-      }
-    }
-
-    if (closestSnap) {
-      setSnapPreview({
-        area: closestSnap.area,
-        x: closestSnap.x,
-        y: closestSnap.y,
-        width: closestSnap.width,
-        height: closestSnap.height,
-      });
-    } else {
-      setSnapPreview(null);
-    }
-  }, []);
 
   const startDrag = useCallback((e: React.MouseEvent) => {
     if (isMobile) return;

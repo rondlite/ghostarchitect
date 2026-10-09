@@ -102,7 +102,7 @@ export function IOCExtraction({ onComplete }: IOCExtractionProps) {
           IOC Documentation
         </h2>
         <p className="text-sm text-[var(--text-secondary)] mb-6 leading-relaxed max-w-[60ch]">
-          You've identified suspicious activity. Before documenting Indicators of Compromise,
+          You&apos;ve identified suspicious activity. Before documenting Indicators of Compromise,
           you need to decide how to proceed.
         </p>
 
@@ -141,7 +141,7 @@ export function IOCExtraction({ onComplete }: IOCExtractionProps) {
                   Attempt IOC extraction yourself
                 </p>
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  Document the attacker's IP, C2 server, compromised accounts and
+                  Document the attacker&apos;s IP, C2 server, compromised accounts and
                   staging paths directly from the logs. Higher reward if you get it right —
                   but if you miss critical indicators, it will count against you.
                 </p>
