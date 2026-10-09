@@ -163,7 +163,7 @@ export function WindowsShell({
 
   // Initialize taskbar apps
   useEffect(() => {
-    const apps = windows.map((window) => ({
+    const apps: TaskbarAppType[] = windows.map((window) => ({
       id: window.id,
       title: window.title,
       icon: (
@@ -177,7 +177,7 @@ export function WindowsShell({
       isRunning: true,
       isActive: activeWindowId === window.id,
       isMinimized: minimizedWindows.has(window.id),
-      kind: "window",
+      kind: "window" as const,
       onClick: () => {
         if (minimizedWindows.has(window.id)) {
           setMinimizedWindows(prev => {
@@ -218,7 +218,7 @@ export function WindowsShell({
         isRunning: true,
         isActive: activeWindowId === "messages",
         isMinimized: minimizedWindows.has("messages"),
-        kind: "panel",
+        kind: "panel" as const,
         onClick: () => {
           setActiveWindowId("messages");
         },
@@ -254,7 +254,7 @@ export function WindowsShell({
       isRunning: true,
       isActive: !!panelOpen.scoreboard,
       isMinimized: false,
-      kind: "panel",
+      kind: "panel" as const,
       onClick: onAppClick ? () => onAppClick?.("scoreboard") : () => {},
       onMinimize: () => {},
       onRestore: () => {},
@@ -272,7 +272,7 @@ export function WindowsShell({
         isRunning: true,
         isActive: !!panelOpen.wiki,
         isMinimized: false,
-        kind: "panel",
+        kind: "panel" as const,
         onClick: onAppClick ? () => onAppClick?.("wiki") : () => {},
         onMinimize: () => {},
         onRestore: () => {},

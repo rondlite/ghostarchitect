@@ -152,6 +152,7 @@ export function Taskbar({
   };
 
   return (
+    <>
     <motion.div
       ref={taskbarRef}
       className={`taskbar ${className}`}
@@ -219,7 +220,7 @@ export function Taskbar({
                     if (group.windows.length === 1) {
                       // Single window in group, just focus it
                       const window = group.windows[0];
-                      taskbarApps.find(a => a.id === window.id)?.onClick?.();
+                      apps.find(a => a.id === window.id)?.onClick?.();
                     } else {
                       // Toggle group expansion
                       toggleGroup(group.id);
@@ -277,7 +278,7 @@ export function Taskbar({
                             className={`window-item ${window.focused ? 'focused' : ''}`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              taskbarApps.find(a => a.id === window.id)?.onClick?.();
+                              apps.find(a => a.id === window.id)?.onClick?.();
                             }}
                           >
                             <span className="window-title">{window.title}</span>
@@ -431,7 +432,13 @@ export function Taskbar({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-            >\n              {clock.date}\n            </motion.div>\n          </motion.div>\n        )}\n      </motion.div>\n    </motion.div>
+            >
+              {clock.date}
+            </motion.div>
+          </motion.div>
+        )}
+      </motion.div>
+    </motion.div>
 
       {/* Taskbar Preview Popup */}
       <AnimatePresence>
@@ -484,4 +491,6 @@ export function Taskbar({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
+  );
+}
