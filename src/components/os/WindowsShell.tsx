@@ -7,7 +7,9 @@ import { Window } from "./Window";
 import { Taskbar, TaskbarApp } from "./Taskbar";
 import { StartMenu, StartMenuItem } from "./StartMenu";
 import { useGameStore } from "@/stores/gameStore";
-import type { WindowConfig } from "@/shared/components/WindowManager";
+import type { WindowConfig } from "./types";
+import type { TaskbarApp as TaskbarAppType } from "./Taskbar";
+
 
 interface WindowsShellProps {
   windows: WindowConfig[];
