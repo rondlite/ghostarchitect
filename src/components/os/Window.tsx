@@ -347,23 +347,26 @@ export function Window({
             // zIndex removed - CSS handles active state with z-index: 1000
             ...style,
           }}
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ 
             opacity: 1, 
             scale: 1, 
             y: 0,
             transition: { 
-              duration: 0.3,
-              ease: [0.22, 1, 0.36, 1]
+              type: "spring",
+              stiffness: 300,
+              damping: 25
             }
           }}
           exit={{ 
             opacity: 0, 
-            scale: 0.95,
-            y: -20,
-            transition: { duration: 0.2 }
+            scale: 0.8,
+            transition: { 
+              duration: 0.2,
+              ease: "easeOut"
+            }
           }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.3 }}
           data-testid={`window-${id}`}
           onPointerDown={() => {
             handleFocus();
@@ -395,7 +398,7 @@ export function Window({
           )}
 
           {/* Window Header */}
-          <div
+          <motion.div
             ref={headerRef}
             className="window-header"
             onMouseDown={handleMouseDown}
@@ -405,6 +408,18 @@ export function Window({
               zIndex: 20,
             }}
             data-window-title
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ 
+              opacity: 1, 
+              y: 0,
+              transition: { 
+                delay: 0.05,
+                type: "spring",
+                stiffness: 400,
+                damping: 20
+              }
+            }}
+            exit={{ opacity: 0, y: -10 }}
           >
             {icon && <div className="window-header-icon">{icon}</div>}
             <div className="window-header-title">{title}</div>
@@ -417,6 +432,9 @@ export function Window({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 500, damping: 17 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
               >
                 <svg viewBox="0 0 16 16" fill="currentColor">
                   <path d="M0 7v2h16V7z" />
@@ -430,6 +448,9 @@ export function Window({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 500, damping: 17 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
               >
                 {isMaximizedState ? (
                   <svg viewBox="0 0 16 16" fill="currentColor">
@@ -449,24 +470,29 @@ export function Window({
                 whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.1)" }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 500, damping: 17 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
               >
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                   <path d="M1 1l14 14M15 1L1 15" />
                 </svg>
               </motion.button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Window Content */}
           <motion.div
             className="window-content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ 
-              delay: 0.1,
-              duration: 0.3,
-              ease: "easeOut"
+              delay: 0.15,
+              type: "spring",
+              stiffness: 250,
+              damping: 20
             }}
+            exit={{ opacity: 0, scale: 0.9 }}
             style={{
               pointerEvents: isMobile ? "none" : "auto",
             }}
