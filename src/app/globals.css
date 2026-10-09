@@ -250,6 +250,12 @@
   min-height: 200px;
   max-width: calc(100vw - 32px);
   max-height: calc(100vh - 120px);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.window:hover {
+  transform: translateY(-1px);
+  box-shadow: calc(var(--window-shadow) + 0 2px 8px rgba(0,0,0,0.1));
 }
 
 .window.active {
@@ -267,6 +273,15 @@
   max-width: 100vw !important;
   max-height: calc(100vh - 48px) !important;
   border-radius: 0 !important;
+}
+
+.window.focused {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: -1px;
+}
+
+.window.maximized.focused {
+  outline: none;
 }
 
 .window.dragging {
@@ -320,21 +335,27 @@
 }
 
 .window-controls button {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border: none;
   background: transparent;
   color: var(--window-header-text);
   border-radius: 4px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: background 150ms ease;
+  transition: background 150ms ease, transform 150ms ease;
+  position: relative;
 }
 
 .window-controls button:hover {
   background: rgba(255,255,255,0.1);
+  transform: scale(1.1);
+}
+
+.window-controls button:active {
+  transform: scale(0.95);
 }
 
 .window-controls button.minimize:hover {
@@ -461,12 +482,18 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: background 150ms ease;
+  transition: background 150ms ease, transform 150ms ease;
   position: relative;
 }
 
 .taskbar-app-button:hover {
   background: var(--accent-subtle);
+  transform: translateY(-1px);
+}
+
+.taskbar-app-button:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
 }
 
 .taskbar-app-button.appicon {
@@ -660,11 +687,13 @@
   gap: 4px;
   cursor: pointer;
   opacity: 0.9;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms ease, transform 150ms ease;
+  transform-origin: bottom center;
 }
 
 .desktop-icon:hover {
   opacity: 1;
+  transform: translateY(-2px);
 }
 
 .desktop-icon svg {

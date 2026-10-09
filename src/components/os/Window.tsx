@@ -19,6 +19,7 @@ export interface WindowProps {
   defaultSize?: { width: number; height: number };
   isMinimized?: boolean;
   onMinimizeChange?: (minimized: boolean) => void;
+  onPointerDown?: (id: string) => void;
 }
 
 export function Window({
@@ -37,6 +38,7 @@ export function Window({
   defaultSize = { width: 640, height: 480 },
   isMinimized = false,
   onMinimizeChange,
+  onPointerDown,
 }: WindowProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState(defaultPosition);
@@ -46,6 +48,13 @@ export function Window({
   const [isFocused, setIsFocused] = useState(isActive);
   const windowRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+
+  // Update z-index when window is clicked (raises it to front)
+  const handleFocus = () => {
+    setIsFocused(true);
+    // Note: The parent component (WindowsShell) should setActiveWindowId(id)
+    // This component expects an onPointerDown handler from the parent
+  };
   // Active drag listeners, so they can always be removed (end-drag OR unmount mid-drag)
   const dragCleanupRef = useRef<(() => void) | null>(null);
 
@@ -91,6 +100,10 @@ export function Window({
 
   // Handle drag functionality
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Raise window to front when dragging starts
+    handleFocus();
+    onPointerDown?.(id);
+    
     // Only initiate drag from the header bar itself (not its buttons/controls)
     if (windowRef.current?.classList.contains('maximized')) {
       return;
@@ -184,7 +197,7 @@ export function Window({
             top: isMaximizedState ? 0 : (isMobile ? 0 : position.y),
             width: isMaximizedState ? '100vw' : (isMobile ? '100vw' : size.width),
             height: isMaximizedState ? 'calc(100vh - 48px)' : (isMobile ? 'calc(100vh - 48px)' : size.height),
-            zIndex: isActive ? 30 : 10,
+            // zIndex removed - CSS handles active state with z-index: 1000
             ...style,
           }}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -205,7 +218,17 @@ export function Window({
           }}
           transition={{ duration: 0.2 }}
           data-testid={`window-${id}`}
-          onClick={() => setIsFocused(true)}
+          onPointerDown={() => {
+            handleFocus();
+            onPointerDown?.(id);
+          }}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Tab' || e.key === 'Enter') {
+              handleFocus();
+              onPointerDown?.(id);
+            }
+          }}
         >
           {/* Focus Ring */}
           {isFocused && (

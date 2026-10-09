@@ -346,6 +346,7 @@ export function WindowsShell({
                     });
                   }
                 }}
+                onPointerDown={(id) => setActiveWindowId(window.id)}
                 onClose={() => {
                   // Don't allow closing critical windows
                   if (!["start", "login", "sim-intro", "mfa", "ending"].includes(window.id)) {
@@ -384,6 +385,7 @@ export function WindowsShell({
                 });
               }
             }}
+            onPointerDown={(id) => setActiveWindowId("messages")}
             onClose={() => {
               setMinimizedWindows(prev => new Set([...prev, "messages"]));
             }}
