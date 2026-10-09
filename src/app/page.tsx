@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { OSShell } from "@/shared/components/OSShell";
+import { WindowsShell } from "@/components/os/WindowsShell";
 import { DMSidebar } from "@/shared/components/DMSidebar";
 import { useBreachTransition } from "@/shared/components/TransitionOverlay";
 import { useStepTransition } from "@/shared/hooks/useStepTransition";
@@ -1000,7 +1000,7 @@ export default function Home() {
       {step === "ending" ? (
         <EndingPage onPlayAgain={resetGame} />
       ) : (
-        <OSShell
+        <WindowsShell
           key={step}
           windows={windows}
           dmSidebar={dmSidebar}
