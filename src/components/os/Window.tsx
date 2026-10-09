@@ -183,6 +183,7 @@ export function Window({
             top: isMaximizedState ? 0 : (isMobile ? 0 : position.y),
             width: isMaximizedState ? '100vw' : (isMobile ? '100vw' : size.width),
             height: isMaximizedState ? 'calc(100vh - 48px)' : (isMobile ? 'calc(100vh - 48px)' : size.height),
+            zIndex: isActive ? 30 : 10,
             ...style,
           }}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}

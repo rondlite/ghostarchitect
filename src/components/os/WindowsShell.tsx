@@ -235,24 +235,24 @@ export function WindowsShell({
       });
     }
 
-    // Add system apps (scoreboard, wiki)
-    if (panelOpen.scoreboard) {
-      apps.push({
-        id: "scoreboard",
-        title: "Scoreboard",
-        icon: (
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M0 2h16v12H0V2zm1 1v10h14V3H1zm2 2h10v1H3V5zm0 3h8v1H3V8z" />
-          </svg>
-        ),
-        isRunning: true,
-        isActive: !!panelOpen.scoreboard,
-        isMinimized: false,
-        onClick: onAppClick ? () => onAppClick?.("scoreboard") : () => {},
-        onMinimize: () => {},
-        onRestore: () => {},
-      });
-    }
+    // Add system apps (scoreboard always available, wiki when open)
+    apps.push({
+      id: "scoreboard",
+      title: "Scoreboard",
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <rect x="1" y="8" width="3" height="6" />
+          <rect x="6" y="5" width="3" height="9" />
+          <rect x="11" y="2" width="3" height="12" />
+        </svg>
+      ),
+      isRunning: true,
+      isActive: !!panelOpen.scoreboard,
+      isMinimized: false,
+      onClick: onAppClick ? () => onAppClick?.("scoreboard") : () => {},
+      onMinimize: () => {},
+      onRestore: () => {},
+    });
 
     if (panelOpen.wiki) {
       apps.push({
@@ -312,10 +312,14 @@ export function WindowsShell({
       >
         {/* Windows */}
         <AnimatePresence>
-          {windows.map((window) => {
+          {windows.map((window, index) => {
             const isMinimized = minimizedWindows.has(window.id);
             const isActive = activeWindowId === window.id;
-            
+
+            // Cascade positions so windows don't stack on the same spot
+            const cascadeX = 60 + (index % 5) * 40;
+            const cascadeY = 40 + (index % 5) * 32;
+
             return (
               <Window
                 key={window.id}
@@ -348,7 +352,7 @@ export function WindowsShell({
                     setMinimizedWindows(prev => new Set([...prev, window.id]));
                   }
                 }}
-                defaultPosition={{ x: 100, y: 100 }}
+                defaultPosition={{ x: cascadeX, y: cascadeY }}
                 defaultSize={{ width: 640, height: 480 }}
               >
                 {window.content}
@@ -356,6 +360,39 @@ export function WindowsShell({
             );
           })}
         </AnimatePresence>
+
+        {/* Team Chat (DM sidebar) as its own window */}
+        {dmSidebar && (
+          <Window
+            id="messages"
+            title="Team Chat"
+            icon={
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M1 2h14v9H6l-4 3v-3H1V2zm1 1v7h2v2l3-2h7V3H2z" />
+              </svg>
+            }
+            isActive={activeWindowId === "messages"}
+            isMinimized={minimizedWindows.has("messages")}
+            onMinimizeChange={(minimized) => {
+              if (minimized) {
+                setMinimizedWindows(prev => new Set([...prev, "messages"]));
+              } else {
+                setMinimizedWindows(prev => {
+                  const newSet = new Set(prev);
+                  newSet.delete("messages");
+                  return newSet;
+                });
+              }
+            }}
+            onClose={() => {
+              setMinimizedWindows(prev => new Set([...prev, "messages"]));
+            }}
+            defaultPosition={{ x: 720, y: 80 }}
+            defaultSize={{ width: 420, height: 560 }}
+          >
+            {dmSidebar}
+          </Window>
+        )}
 
         {/* Start Menu */}
         <StartMenu
