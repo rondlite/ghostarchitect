@@ -28,6 +28,23 @@ RUN npx prisma generate --schema=src/prisma/schema.prisma
 RUN npm run build
 
 # ─────────────────────────────────────────
+# Stage 2b: prisma-cli — self-contained Prisma CLI for runtime schema sync.
+# The runner is offline; `npx` would try to download from the npm registry at
+# runtime. npm install gives the FULL dependency closure of the CLI (verified
+# empirically — copying prisma/ + @prisma/* alone misses @prisma/engines,
+# effect, c12, jiti, ...). MUST match the app's lockfile prisma version.
+# ─────────────────────────────────────────
+FROM node:22-bullseye AS prisma-cli
+WORKDIR /prisma
+# Version is read from the app's lockfile so CLI and app can never drift apart
+COPY --from=deps /app/package-lock.json /tmp/package-lock.json
+RUN PRISMA_VER=$(node -e "const l=require('/tmp/package-lock.json');console.log(l.packages['node_modules/prisma']?.version||'7.7.0')") && \
+    echo "Installing prisma CLI ${PRISMA_VER}" && \
+    npm init -y >/dev/null && \
+    npm install --no-package-lock "prisma@${PRISMA_VER}" "@next/env" && \
+    npm cache clean --force
+
+# ─────────────────────────────────────────
 # Stage 3: runner — minimal production image
 # ─────────────────────────────────────────
 FROM node:22-bullseye-slim AS runner
@@ -50,12 +67,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 # Prisma schema needed at runtime for query engine path resolution
 COPY --from=builder --chown=nextjs:nodejs /app/src/prisma/schema.prisma ./src/prisma/schema.prisma
 
-# Prisma CLI + config for runtime schema sync (initAdminOnStartup + k8s db-init job).
-# The runner is offline: without these, `npx prisma db push` tries to download the
-# CLI from the npm registry at runtime and fails ("Command failed: npx prisma db push").
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@next ./node_modules/@next
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+# Self-contained Prisma CLI for runtime schema sync (initAdminOnStartup + k8s
+# db-init job). Full closure from the dedicated build stage — see stage 2b.
+COPY --from=prisma-cli --chown=nextjs:nodejs /prisma/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
