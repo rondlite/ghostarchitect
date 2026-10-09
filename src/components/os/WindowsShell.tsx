@@ -142,6 +142,7 @@ export function WindowsShell({
   const [minimizedWindows, setMinimizedWindows] = useState<Set<string>>(new Set());
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [desktopIcons, setDesktopIcons] = useState<StartMenuItem[]>([]);
+  const [desktopIconPositions, setDesktopIconPositions] = useState<Record<string, { x: number; y: number }>>({});
   const [taskbarApps, setTaskbarApps] = useState<TaskbarApp[]>([]);
   const visualMode = useGameStore((s) => s.visualMode);
   const teamName = useGameStore((s) => s.teamName);
@@ -301,6 +302,14 @@ export function WindowsShell({
     setStartMenuOpen(false);
   }, []);
 
+  const handleDesktopIconMove = useCallback((id: string, x: number, y: number) => {
+    setDesktopIconPositions(prev => ({
+      ...prev,
+      [id]: { x, y }
+    }));
+    // TODO: Persist to localStorage in a real implementation
+  }, []);
+
   const handleResetLayout = useCallback(() => {
     setMinimizedWindows(new Set());
   }, []);
@@ -311,7 +320,12 @@ export function WindowsShell({
     <div className="h-screen w-screen overflow-hidden">
       <Desktop
         className="relative h-full"
-        icons={desktopIcons}
+        icons={desktopIcons.map(icon => ({
+          ...icon,
+          x: desktopIconPositions[icon.id]?.x || 50,
+          y: desktopIconPositions[icon.id]?.y || 50,
+        }))}
+        onIconMove={handleDesktopIconMove}
         sessionInfo={`${teamName} · ${visualMode === "corporate" ? "Corporate environment" : "Incident workspace"}`}
         corporateSessionInfo={`${teamName} · Corporate environment`}
         breachSessionInfo={`${teamName} · Incident workspace · Training session`}

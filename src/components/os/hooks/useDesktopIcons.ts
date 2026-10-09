@@ -2,49 +2,23 @@
 
 import { useState, useCallback, useEffect } from "react";
 
-export interface DesktopIcon {
+export interface DraggableDesktopIcon {
   id: string;
-  label: string;
+  title: string;
   icon: React.ReactNode;
+  onClick?: () => void;
+  tooltip?: string;
   x: number;
   y: number;
-  action: () => void;
 }
 
 const GRID_SIZE = 96; // 96px grid for snapping
 
 export function useDesktopIcons(
-  initialIcons?: DesktopIcon[],
+  initialIcons?: DraggableDesktopIcon[],
   onIconMove?: (id: string, x: number, y: number) => void
 ) {
-  const [icons, setIcons] = useState<DesktopIcon[]>(
-    initialIcons || [
-      {
-        id: "computer",
-        label: "Computer",
-        icon: "💻",
-        x: 50,
-        y: 50,
-        action: () => console.log("Computer clicked"),
-      },
-      {
-        id: "documents",
-        label: "Documents",
-        icon: "📄",
-        x: 146,
-        y: 50,
-        action: () => console.log("Documents clicked"),
-      },
-      {
-        id: "team-chat",
-        label: "Team Chat",
-        icon: "💬",
-        x: 242,
-        y: 50,
-        action: () => console.log("Team Chat clicked"),
-      },
-    ]
-  );
+  const [icons, setIcons] = useState<DraggableDesktopIcon[]>(initialIcons || []);
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -103,8 +77,8 @@ export function useDesktopIcons(
     if (draggingId) return;
     
     const icon = icons.find((i) => i.id === iconId);
-    if (icon) {
-      icon.action();
+    if (icon && icon.onClick) {
+      icon.onClick();
     }
   }, [icons, draggingId]);
 

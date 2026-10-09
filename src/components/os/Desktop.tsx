@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useLayoutEffect, ReactNode } from 'react';
+import { useDesktopIcons, type DraggableDesktopIcon } from './hooks/useDesktopIcons';
 
 export interface DesktopIcon {
   id: string;
@@ -14,6 +15,7 @@ export interface DesktopProps {
   className?: string;
   children?: ReactNode;
   icons?: DesktopIcon[];
+  onIconMove?: (id: string, x: number, y: number) => void;
   wallpaper?: ReactNode;
   showWallpaperDecorations?: boolean;
   sessionInfo?: ReactNode;
@@ -25,6 +27,7 @@ export function Desktop({
   className = '',
   children,
   icons = [],
+  onIconMove,
   wallpaper,
   showWallpaperDecorations = true,
   sessionInfo,
@@ -33,6 +36,8 @@ export function Desktop({
 }: DesktopProps) {
   const [sessionText, setSessionText] = useState(corporateSessionInfo);
   const [isHydrated, setIsHydrated] = useState(false);
+  
+  const { icons: draggableIcons, draggingId, startDrag, handleIconClick } = useDesktopIcons(icons as DraggableDesktopIcon[], onIconMove);
 
   // Get current theme from DOM with proper hydration
   const getTheme = () => {
@@ -94,13 +99,18 @@ export function Desktop({
 
       {/* Desktop Icons */}
       <div className="desktop-icons">
-        {icons.map((icon) => (
+        {draggableIcons.map((icon) => (
           <button
             key={icon.id}
-            className="desktop-icon"
-            onClick={icon.onClick}
+            className={`desktop-icon ${draggingId === icon.id ? 'dragging' : ''}`}
+            onClick={() => handleIconClick(icon.id)}
+            onMouseDown={(e) => startDrag(e, icon.id)}
             title={icon.tooltip || icon.title}
             aria-label={icon.title}
+            style={{
+              left: `${icon.x}px`,
+              top: `${icon.y}px`,
+            }}
           >
             <div className="icon-container">
               {icon.icon}
