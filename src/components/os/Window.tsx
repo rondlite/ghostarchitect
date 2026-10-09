@@ -341,7 +341,17 @@ export function Window({
         });
       }
     }
-  }, [isSnapped, onSnap, onRestore, isMobile]);    // Initial detection
+  }, [isSnapped, onSnap, onRestore, isMobile]);
+
+  // Mobile detection
+  useEffect(() => {
+    const updateMobileState = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth < 768);
+      }
+    };
+
+    // Initial detection
     updateMobileState();
 
     // Handle resize events
