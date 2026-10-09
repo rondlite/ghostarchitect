@@ -313,36 +313,6 @@ export function Window({
     };
   };
 
-  // Handle double-click for maximize/restore
-  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
-    if (isMobile) return;
-
-    const target = e.target as HTMLElement;
-    if (target.closest('[data-window-title]') || target.closest('.window-title-bar')) {
-      if (isSnapped) {
-        setIsSnapped(false);
-        setSnapPreview(null);
-        setIsMaximizedState(false);
-        onRestore?.();
-      } else {
-        // Maximize to full screen
-        setPosition({ x: 0, y: 0 });
-        setSize({ 
-          width: window.innerWidth, 
-          height: window.innerHeight - 48 
-        });
-        setIsSnapped(true);
-        setIsMaximizedState(true);
-        onSnap?.("top", {
-          x: 0,
-          y: 0,
-          width: window.innerWidth,
-          height: window.innerHeight - 48,
-        });
-      }
-    }
-  }, [isSnapped, onSnap, onRestore, isMobile]);
-
   // Mobile detection
   useEffect(() => {
     const updateMobileState = () => {
