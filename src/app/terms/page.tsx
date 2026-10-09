@@ -141,7 +141,7 @@ export default function TermsPage() {
         {/* 2. Grant of Use */}
         <Section i={7} title="2. Grant of Use">
           <P>
-            Demandcluster grants you a free, non-exclusive, non-transferable right to access and use the Platform solely
+            Ron van Etten grants you a free, non-exclusive, non-transferable right to access and use the Platform solely
             for the purpose described in section 3. No payment is required.
           </P>
         </Section>
@@ -272,7 +272,7 @@ export default function TermsPage() {
         {/* 9. Termination */}
         <Section i={14} title="9. Termination">
           <P>
-            Demandcluster may suspend or terminate your Trainer account at any time if these Terms are violated. You
+            Ron van Etten may suspend or terminate your Trainer account at any time if these Terms are violated. You
             may delete your account and all associated data at any time from the trainer dashboard. Upon termination,
             all Team and Session data associated with your account is deleted immediately.
           </P>
@@ -289,7 +289,7 @@ export default function TermsPage() {
         {/* 11. Changes */}
         <Section i={16} title="11. Changes to These Terms">
           <P>
-            Demandcluster may update these Terms from time to time. When we do, the version date at the top of this
+            Ron van Etten may update these Terms from time to time. When we do, the version date at the top of this
             page will be updated. Continued use of the Platform after changes are posted constitutes acceptance. We
             encourage you to review these Terms periodically.
           </P>
