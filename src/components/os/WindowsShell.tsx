@@ -6,6 +6,7 @@ import { Desktop } from "./Desktop";
 import { Window } from "./Window";
 import { Taskbar, TaskbarApp } from "./Taskbar";
 import { StartMenu, StartMenuItem } from "./StartMenu";
+import { FocusStack } from "./focusStack";
 import { useGameStore } from "@/stores/gameStore";
 import type { WindowConfig } from "./types";
 import type { TaskbarApp as TaskbarAppType } from "./Taskbar";
@@ -147,6 +148,34 @@ export function WindowsShell({
   const visualMode = useGameStore((s) => s.visualMode);
   const teamName = useGameStore((s) => s.teamName);
 
+  // Focus-history z-order: every window gets a distinct z-index; the most
+  // recently focused window is on top. Focus changes must NOT re-stack the
+  // other windows (the old binary active/auto scheme made them flip).
+  const focusStackRef = useRef(new FocusStack());
+
+  // Snapshot of z-indexes for render: derived from the stack during render is
+  // flagged by react-hooks (refs in render), so we snapshot into state instead.
+  const [zIndexes, setZIndexes] = useState<Record<string, number>>({});
+  const syncZ = useCallback(() => setZIndexes({ ...focusStackRef.current.all() }), []);
+  const focusWindow = useCallback((id: string) => {
+    const fs = focusStackRef.current;
+    fs.register(id);
+    fs.focus(id);
+    setActiveWindowId(id);
+    syncZ();
+  }, [syncZ]);
+
+  // Register all windows + chat in the focus stack whenever the set changes
+  useEffect(() => {
+    const fs = focusStackRef.current;
+    const known = new Set([...windows.map(w => w.id), ...(dmSidebar ? ["messages"] : [])]);
+    for (const id of known) fs.register(id);
+    for (const id of Object.keys(fs.all())) {
+      if (!known.has(id)) fs.unregister(id);
+    }
+    syncZ();
+  }, [windows, dmSidebar, syncZ]);
+
   // Initialize desktop icons from current phase
   useEffect(() => {
     const icons = Object.entries(phaseToApp)
@@ -154,7 +183,7 @@ export function WindowsShell({
       .map(([_, app]) => ({
         ...app,
         onClick: () => {
-          setActiveWindowId(app.id);
+          focusWindow(app.id);
         },
       }));
 
@@ -186,7 +215,7 @@ export function WindowsShell({
             return newSet;
           });
         }
-        setActiveWindowId(window.id);
+        focusWindow(window.id);
       },
       onMinimize: (id: string) => {
         setMinimizedWindows(prev => {
@@ -201,7 +230,7 @@ export function WindowsShell({
           newSet.delete(id);
           return newSet;
         });
-        setActiveWindowId(id);
+        focusWindow(id);
       },
     }));
 
@@ -220,7 +249,14 @@ export function WindowsShell({
         isMinimized: minimizedWindows.has("messages"),
         kind: "panel" as const,
         onClick: () => {
-          setActiveWindowId("messages");
+          if (minimizedWindows.has("messages")) {
+            setMinimizedWindows(prev => {
+              const newSet = new Set(prev);
+              newSet.delete("messages");
+              return newSet;
+            });
+          }
+          focusWindow("messages");
         },
         onMinimize: (id: string) => {
           setMinimizedWindows(prev => {
@@ -235,7 +271,7 @@ export function WindowsShell({
             newSet.delete(id);
             return newSet;
           });
-          setActiveWindowId(id);
+          focusWindow(id);
         },
       });
     }
@@ -287,7 +323,7 @@ export function WindowsShell({
     if (activeWindowId && minimizedWindows.has(activeWindowId)) {
       const activeWindows = windows.filter(w => !minimizedWindows.has(w.id));
       if (activeWindows.length > 0) {
-        setActiveWindowId(activeWindows[0].id);
+        focusWindow(activeWindows[0].id);
       } else {
         setActiveWindowId("");
       }
@@ -355,6 +391,7 @@ export function WindowsShell({
                 }
                 isActive={isActive}
                 isMinimized={isMinimized}
+                zIndex={zIndexes[window.id]}
                 onMinimizeChange={(minimized) => {
                   if (minimized) {
                     setMinimizedWindows(prev => new Set([...prev, window.id]));
@@ -366,7 +403,7 @@ export function WindowsShell({
                     });
                   }
                 }}
-                onPointerDown={(id) => setActiveWindowId(window.id)}
+                onPointerDown={(id) => focusWindow(window.id)}
                 onClose={() => {
                   // Don't allow closing critical windows
                   if (!["start", "login", "sim-intro", "mfa", "ending"].includes(window.id)) {
@@ -400,6 +437,7 @@ export function WindowsShell({
             }
             isActive={activeWindowId === "messages"}
             isMinimized={minimizedWindows.has("messages")}
+            zIndex={zIndexes["messages"]}
             onMinimizeChange={(minimized) => {
               if (minimized) {
                 setMinimizedWindows(prev => new Set([...prev, "messages"]));
@@ -411,7 +449,7 @@ export function WindowsShell({
                 });
               }
             }}
-            onPointerDown={(id) => setActiveWindowId("messages")}
+            onPointerDown={(id) => focusWindow("messages")}
             onClose={() => {
               setMinimizedWindows(prev => new Set([...prev, "messages"]));
             }}

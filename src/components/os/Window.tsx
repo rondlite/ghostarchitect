@@ -21,6 +21,8 @@ export interface WindowProps {
   onMinimizeChange?: (minimized: boolean) => void;
   onPointerDown?: (id: string) => void;
   onSnap?: (snapType: string, position: { x: number; y: number; width: number; height: number }) => void;
+  /** Focus-history z-order from the shell; omit to fall back to binary active stacking */
+  zIndex?: number;
   onRestore?: () => void;
 }
 
@@ -43,6 +45,7 @@ export function Window({
   onPointerDown,
   onSnap,
   onRestore,
+  zIndex,
 }: WindowProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState(defaultPosition);
@@ -344,7 +347,10 @@ export function Window({
             top: isMaximizedState ? 0 : (isMobile ? 0 : position.y),
             width: isMaximizedState ? '100vw' : (isMobile ? '100vw' : size.width),
             height: isMaximizedState ? 'calc(100vh - 48px)' : (isMobile ? 'calc(100vh - 48px)' : size.height),
-            // zIndex removed - CSS handles active state with z-index: 1000
+            // Focus-history z-order from the shell (FocusStack): distinct per
+            // window, most-recently-focused on top. Replaces the binary
+            // .active{z-index:1000}/rest-auto scheme that made windows flip.
+            zIndex: zIndex ?? (isActive ? 1000 : 1),
             ...style,
           }}
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
