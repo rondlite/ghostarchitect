@@ -82,7 +82,8 @@ USER nextjs
 
 EXPOSE 3000
 
+# node:22-bullseye-slim has no wget/curl — use Node's built-in fetch for the healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost:3000/api/health 2>/dev/null || exit 1
+  CMD node -e "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 CMD ["node", "server.js"]
