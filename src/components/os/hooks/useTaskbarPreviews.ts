@@ -10,7 +10,7 @@ export interface WindowPreview {
 }
 
 export function useTaskbarPreviews(
-  appButtons: Array<{ id: string; label: string; icon: React.ReactNode }>,
+  appButtons: Array<{ id: string; title: string; icon: React.ReactNode; onClick?: () => void }>,
   focusedApp: string,
   showPreviewsDelay = 400
 ) {
@@ -56,7 +56,10 @@ export function useTaskbarPreviews(
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       // Focus the window
-      console.log(`Focus window: ${appId}`);
+      const app = appButtons.find(a => a.id === appId);
+      if (app) {
+        app.onClick?.();
+      }
     } else if (e.key === "Escape") {
       setShowPreview(false);
       setPreviewAppId(null);
@@ -66,7 +69,7 @@ export function useTaskbarPreviews(
   // Update preview data when focused app changes
   const appPreviews = appButtons.map((app) => ({
     id: app.id,
-    title: app.label,
+    title: app.title,
     icon: app.icon,
     focused: focusedApp === app.id,
   }));
@@ -84,7 +87,10 @@ export function useTaskbarPreviews(
   const handleButtonClick = (appId: string) => {
     setShowPreview(false);
     setPreviewAppId(null);
-    console.log(`Focus window: ${appId}`);
+    const app = appButtons.find(a => a.id === appId);
+    if (app) {
+      app.onClick?.();
+    }
   };
 
   return {

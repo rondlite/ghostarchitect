@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTaskbarGrouping, type GroupedApp } from "./hooks/useTaskbarGrouping";
+import { useTaskbarPreviews } from "./hooks/useTaskbarPreviews";
 
 export interface TaskbarApp {
   id: string;
@@ -69,6 +70,23 @@ export function Taskbar({
     6
   );
 
+  // Use taskbar previews
+  const { 
+    previewAppId, 
+    showPreview, 
+    previewPosition, 
+    appPreviews, 
+    buttonRefs,
+    handleMouseEnter,
+    handleMouseLeave,
+    handleKeyDown,
+    handleButtonClick
+  } = useTaskbarPreviews(
+    apps,
+    activeApp,
+    400
+  );
+
   useEffect(() => {
     // Update clock every minute
     const updateClock = () => {
@@ -113,7 +131,7 @@ export function Taskbar({
     setTimeout(() => setIsAnimating(false), 300);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleTaskbarKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape' && startMenuOpen) {
       onStartMenuToggle?.(false);
       // Focus back on the Start button when menu closes with Escape
@@ -137,7 +155,7 @@ export function Taskbar({
     <motion.div
       ref={taskbarRef}
       className={`taskbar ${className}`}
-      onKeyDown={handleKeyDown}
+      onKeyDown={handleTaskbarKeyDown}
       tabIndex={0}
       role="toolbar"
       aria-label="Taskbar"
@@ -278,6 +296,15 @@ export function Taskbar({
                 <motion.button
                   key={taskApp.id}
                   onClick={taskApp.onClick}
+                  onMouseEnter={(e) => handleMouseEnter(taskApp.id, e)}
+                  onMouseLeave={handleMouseLeave}
+                  ref={(el) => {
+                    if (el) {
+                      buttonRefs.current.set(taskApp.id, el);
+                    } else {
+                      buttonRefs.current.delete(taskApp.id);
+                    }
+                  }}
                   className={`taskbar-app-button ${taskApp.isRunning ? 'running' : ''} ${taskApp.isActive ? 'focused' : ''}`}
                   aria-label={taskApp.title}
                   title={taskApp.title}
@@ -404,12 +431,57 @@ export function Taskbar({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-            >
-              {clock.date}
-            </motion.div>
+            >\n              {clock.date}\n            </motion.div>\n          </motion.div>\n        )}\n      </motion.div>\n    </motion.div>
+
+      {/* Taskbar Preview Popup */}
+      <AnimatePresence>
+        {showPreview && previewAppId && (
+          <motion.div
+            className="taskbar-preview-popup"
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 10 }}
+            style={{
+              position: 'fixed',
+              left: `${previewPosition.x}px`,
+              top: `${previewPosition.y}px`,
+              zIndex: 1000,
+            }}
+          >
+            {appPreviews
+              .filter(preview => preview.id === previewAppId)
+              .map(preview => (
+                <div
+                  key={preview.id}
+                  className="preview-window"
+                  onClick={() => handleButtonClick(preview.id)}
+                  onKeyDown={(e) => handleKeyDown(e, preview.id)}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Preview: ${preview.title}`}
+                >
+                  <div className="preview-header">
+                    <div className="preview-icon">
+                      {preview.icon}
+                    </div>
+                    <div className="preview-title">{preview.title}</div>
+                    {preview.focused && (
+                      <div className="preview-focus-indicator">Active</div>
+                    )}
+                  </div>
+                  <div className="preview-content">
+                    <div className="preview-mock-content">
+                      <div className="preview-text-line"></div>
+                      <div className="preview-text-line short"></div>
+                      <div className="preview-text-line medium"></div>
+                    </div>
+                  </div>
+                  <div className="preview-actions">
+                    <span className="preview-hint">Click to focus • Esc to close</span>
+                  </div>
+                </div>
+              ))}
           </motion.div>
         )}
-      </motion.div>
-    </motion.div>
-  );
-}
+      </AnimatePresence>
+    </div>
