@@ -50,6 +50,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 # Prisma schema needed at runtime for query engine path resolution
 COPY --from=builder --chown=nextjs:nodejs /app/src/prisma/schema.prisma ./src/prisma/schema.prisma
 
+# Prisma CLI + config for runtime schema sync (initAdminOnStartup + k8s db-init job).
+# The runner is offline: without these, `npx prisma db push` tries to download the
+# CLI from the npm registry at runtime and fails ("Command failed: npx prisma db push").
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@next ./node_modules/@next
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
 # Pre-create uploads directory with proper permissions for logo uploads
 RUN mkdir -p /app/public/uploads/logos && \
     chown -R nextjs:nodejs /app/public/uploads && \

@@ -72,7 +72,7 @@ export async function initAdminOnStartup() {
         const dbUrl = process.env.DATABASE_URL;
         if (!dbUrl) throw new Error('DATABASE_URL not set');
         
-        execSync(`npx prisma db push --schema ./src/prisma/schema.prisma --accept-data-loss --url="${dbUrl}"`, {
+        execSync(`node ./node_modules/prisma/build/index.js db push --schema ./src/prisma/schema.prisma --accept-data-loss --url="${dbUrl}"`, {
           stdio: shouldLog ? 'inherit' : 'pipe',
           cwd: process.cwd(),
           env: process.env,

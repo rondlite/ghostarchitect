@@ -17,7 +17,7 @@ spec:
           args:
             - |
               echo "Starting Prisma database migration..."
-              npx prisma db push
+              node ./node_modules/prisma/build/index.js db push --schema ./src/prisma/schema.prisma --accept-data-loss
               echo "Database migration completed successfully!"
           envFrom:
             - configMapRef:
