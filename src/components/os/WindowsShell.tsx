@@ -7,7 +7,9 @@ import { Window } from "./Window";
 import { Taskbar, TaskbarApp } from "./Taskbar";
 import { StartMenu, StartMenuItem } from "./StartMenu";
 import { useGameStore } from "@/stores/gameStore";
-import type { WindowConfig } from "@/shared/components/WindowManager";
+import type { WindowConfig } from "./types";
+import type { TaskbarApp as TaskbarAppType } from "./Taskbar";
+
 
 interface WindowsShellProps {
   windows: WindowConfig[];
@@ -140,6 +142,7 @@ export function WindowsShell({
   const [minimizedWindows, setMinimizedWindows] = useState<Set<string>>(new Set());
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [desktopIcons, setDesktopIcons] = useState<StartMenuItem[]>([]);
+  const [desktopIconPositions, setDesktopIconPositions] = useState<Record<string, { x: number; y: number }>>({});
   const [taskbarApps, setTaskbarApps] = useState<TaskbarApp[]>([]);
   const visualMode = useGameStore((s) => s.visualMode);
   const teamName = useGameStore((s) => s.teamName);
@@ -160,7 +163,7 @@ export function WindowsShell({
 
   // Initialize taskbar apps
   useEffect(() => {
-    const apps = windows.map((window) => ({
+    const apps: TaskbarAppType[] = windows.map((window) => ({
       id: window.id,
       title: window.title,
       icon: (
@@ -174,6 +177,7 @@ export function WindowsShell({
       isRunning: true,
       isActive: activeWindowId === window.id,
       isMinimized: minimizedWindows.has(window.id),
+      kind: "window" as const,
       onClick: () => {
         if (minimizedWindows.has(window.id)) {
           setMinimizedWindows(prev => {
@@ -214,6 +218,7 @@ export function WindowsShell({
         isRunning: true,
         isActive: activeWindowId === "messages",
         isMinimized: minimizedWindows.has("messages"),
+        kind: "panel" as const,
         onClick: () => {
           setActiveWindowId("messages");
         },
@@ -249,6 +254,7 @@ export function WindowsShell({
       isRunning: true,
       isActive: !!panelOpen.scoreboard,
       isMinimized: false,
+      kind: "panel" as const,
       onClick: onAppClick ? () => onAppClick?.("scoreboard") : () => {},
       onMinimize: () => {},
       onRestore: () => {},
@@ -266,6 +272,7 @@ export function WindowsShell({
         isRunning: true,
         isActive: !!panelOpen.wiki,
         isMinimized: false,
+        kind: "panel" as const,
         onClick: onAppClick ? () => onAppClick?.("wiki") : () => {},
         onMinimize: () => {},
         onRestore: () => {},
@@ -295,6 +302,14 @@ export function WindowsShell({
     setStartMenuOpen(false);
   }, []);
 
+  const handleDesktopIconMove = useCallback((id: string, x: number, y: number) => {
+    setDesktopIconPositions(prev => ({
+      ...prev,
+      [id]: { x, y }
+    }));
+    // TODO: Persist to localStorage in a real implementation
+  }, []);
+
   const handleResetLayout = useCallback(() => {
     setMinimizedWindows(new Set());
   }, []);
@@ -305,7 +320,12 @@ export function WindowsShell({
     <div className="h-screen w-screen overflow-hidden">
       <Desktop
         className="relative h-full"
-        icons={desktopIcons}
+        icons={desktopIcons.map(icon => ({
+          ...icon,
+          x: desktopIconPositions[icon.id]?.x || 50,
+          y: desktopIconPositions[icon.id]?.y || 50,
+        }))}
+        onIconMove={handleDesktopIconMove}
         sessionInfo={`${teamName} · ${visualMode === "corporate" ? "Corporate environment" : "Incident workspace"}`}
         corporateSessionInfo={`${teamName} · Corporate environment`}
         breachSessionInfo={`${teamName} · Incident workspace · Training session`}
@@ -353,6 +373,12 @@ export function WindowsShell({
                     setMinimizedWindows(prev => new Set([...prev, window.id]));
                   }
                 }}
+                onSnap={(snapType, position) => {
+                  // Handle snap event if needed
+                }}
+                onRestore={() => {
+                  // Handle restore event if needed
+                }}
                 defaultPosition={{ x: cascadeX, y: cascadeY }}
                 defaultSize={{ width: 640, height: 480 }}
               >
@@ -388,6 +414,12 @@ export function WindowsShell({
             onPointerDown={(id) => setActiveWindowId("messages")}
             onClose={() => {
               setMinimizedWindows(prev => new Set([...prev, "messages"]));
+            }}
+            onSnap={(snapType, position) => {
+              // Handle snap event if needed
+            }}
+            onRestore={() => {
+              // Handle restore event if needed
             }}
             defaultPosition={{ x: 720, y: 80 }}
             defaultSize={{ width: 420, height: 560 }}

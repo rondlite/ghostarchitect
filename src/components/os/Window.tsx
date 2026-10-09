@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export interface WindowProps {
@@ -20,6 +20,8 @@ export interface WindowProps {
   isMinimized?: boolean;
   onMinimizeChange?: (minimized: boolean) => void;
   onPointerDown?: (id: string) => void;
+  onSnap?: (snapType: string, position: { x: number; y: number; width: number; height: number }) => void;
+  onRestore?: () => void;
 }
 
 export function Window({
@@ -39,6 +41,8 @@ export function Window({
   isMinimized = false,
   onMinimizeChange,
   onPointerDown,
+  onSnap,
+  onRestore,
 }: WindowProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState(defaultPosition);
@@ -46,8 +50,43 @@ export function Window({
   const [isMaximizedState, setIsMaximizedState] = useState(isMaximized);
   const [isMinimizedState, setIsMinimizedState] = useState(isMinimized);
   const [isFocused, setIsFocused] = useState(isActive);
+  const [isSnapped, setIsSnapped] = useState(false);
+  const [snapPreview, setSnapPreview] = useState<{ area: string; x: number; y: number; width: number; height: number } | null>(null);
   const windowRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef({ x: 0, y: 0, originalPosition: defaultPosition, originalSize: defaultSize });
+
+  // Focus ring animation
+  const focusRingAnimation = {
+    initial: { opacity: 0 },
+    animate: { 
+      opacity: isFocused ? 1 : 0,
+      transition: { duration: 0.3, ease: "easeOut" }
+    },
+    exit: { opacity: 0 }
+  };
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Update mobile detection on resize and initial mount
+  useEffect(() => {
+    const updateMobileState = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth < 768);
+      }
+    };
+
+    // Initial detection
+    updateMobileState();
+
+    // Handle resize events
+    const handleResize = () => {
+      updateMobileState();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Update z-index when window is clicked (raises it to front)
   const handleFocus = () => {
@@ -55,6 +94,7 @@ export function Window({
     // Note: The parent component (WindowsShell) should setActiveWindowId(id)
     // This component expects an onPointerDown handler from the parent
   };
+  
   // Active drag listeners, so they can always be removed (end-drag OR unmount mid-drag)
   const dragCleanupRef = useRef<(() => void) | null>(null);
 
@@ -98,6 +138,87 @@ export function Window({
     onClose?.();
   };
 
+  // Snap zone checking
+  const checkSnapZones = useCallback((clientX: number, clientY: number) => {
+    if (!windowRef.current || isMobile) return;
+
+    const windowRect = windowRef.current.getBoundingClientRect();
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const taskbarHeight = 48;
+
+    const snapZones = [
+      // Top edge - maximize
+      { area: "top", x: 0, y: 0, width: screenWidth, height: screenHeight - taskbarHeight },
+      // Left edge - half screen
+      { area: "left", x: 0, y: 0, width: screenWidth / 2, height: screenHeight - taskbarHeight },
+      // Right edge - half screen  
+      { area: "right", x: screenWidth / 2, y: 0, width: screenWidth / 2, height: screenHeight - taskbarHeight },
+      // Top-left corner - quarter screen
+      { area: "top-left", x: 0, y: 0, width: screenWidth / 2, height: (screenHeight - taskbarHeight) / 2 },
+      // Top-right corner - quarter screen
+      { area: "top-right", x: screenWidth / 2, y: 0, width: screenWidth / 2, height: (screenHeight - taskbarHeight) / 2 },
+    ];
+
+    const screenThreshold = 50;
+    let closestSnap: typeof snapZones[0] | null = null;
+    let minDistance = screenThreshold;
+
+    for (const zone of snapZones) {
+      const distance = Math.sqrt(
+        Math.pow(clientX - (zone.x + zone.width / 2), 2) + 
+        Math.pow(clientY - (zone.y + zone.height / 2), 2)
+      );
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestSnap = zone;
+      }
+    }
+
+    if (closestSnap) {
+      setSnapPreview({
+        area: closestSnap.area,
+        x: closestSnap.x,
+        y: closestSnap.y,
+        width: closestSnap.width,
+        height: closestSnap.height,
+      });
+    } else {
+      setSnapPreview(null);
+    }
+  }, [isMobile]);
+
+  // Handle double-click for maximize/restore
+  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+    if (isMobile) return;
+
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-window-title]') || target.closest('.window-title-bar')) {
+      if (isSnapped) {
+        setIsSnapped(false);
+        setSnapPreview(null);
+        setIsMaximizedState(false);
+        onRestore?.();
+      } else {
+        // Maximize to full screen
+        setPosition({ x: 0, y: 0 });
+        setSize({ 
+          width: window.innerWidth, 
+          height: window.innerHeight - 48 
+        });
+        setIsSnapped(true);
+        setIsMaximizedState(true);
+        onSnap?.("top", {
+          x: 0,
+          y: 0,
+          width: window.innerWidth,
+          height: window.innerHeight - 48,
+        });
+      }
+    }
+  }, [isSnapped, onSnap, onRestore, isMobile]);
+
   // Handle drag functionality
   const handleMouseDown = (e: React.MouseEvent) => {
     // Raise window to front when dragging starts
@@ -114,8 +235,12 @@ export function Window({
     }
 
     setIsDragging(true);
-    const startX = e.clientX - position.x;
-    const startY = e.clientY - position.y;
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      originalPosition: position,
+      originalSize: size,
+    };
 
     const handleMouseMove = (e: MouseEvent) => {
       // NOTE: do not read the isDragging state here — it is a stale closure
@@ -125,22 +250,56 @@ export function Window({
       if (!desktop) return;
 
       const desktopRect = desktop.getBoundingClientRect();
-      const newX = e.clientX - startX;
-      const newY = e.clientY - startY;
+      const deltaX = e.clientX - dragStartRef.current.x;
+      const deltaY = e.clientY - dragStartRef.current.y;
+      
+      const newX = dragStartRef.current.originalPosition.x + deltaX;
+      const newY = dragStartRef.current.originalPosition.y + deltaY;
 
       // Keep window within desktop bounds (read live viewport state, not stale closure)
-      const mobile = window.innerWidth < 768;
-      const maxX = desktopRect.width - (mobile ? 0 : size.width);
+      const maxX = desktopRect.width - (isMobile ? 0 : size.width);
       const maxY = desktopRect.height - 45; // Account for title bar height
 
       setPosition({
-        x: mobile ? 0 : Math.max(0, Math.min(newX, maxX)),
-        y: mobile ? 0 : Math.max(0, Math.min(newY, maxY)),
+        x: isMobile ? 0 : Math.max(0, Math.min(newX, maxX)),
+        y: isMobile ? 0 : Math.max(0, Math.min(newY, maxY)),
       });
+
+      // Check for snap zones
+      checkSnapZones(e.clientX, e.clientY);
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      
+      if (snapPreview) {
+        // Apply snap
+        const newPosition = {
+          x: snapPreview.x,
+          y: snapPreview.y,
+        };
+        const newSize = {
+          width: snapPreview.width,
+          height: snapPreview.height,
+        };
+        
+        setPosition(newPosition);
+        setSize(newSize);
+        setIsSnapped(true);
+        setIsMaximizedState(snapPreview.area === "top");
+        onSnap?.(snapPreview.area, {
+          ...newPosition,
+          width: newSize.width,
+          height: newSize.height,
+        });
+      } else {
+        // Restore to original position if not snapped
+        setIsSnapped(false);
+        setIsMaximizedState(false);
+        onRestore?.();
+      }
+      
+      setSnapPreview(null);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       dragCleanupRef.current = null;
@@ -154,19 +313,7 @@ export function Window({
     };
   };
 
-  // Focus ring animation
-  const focusRingAnimation = {
-    initial: { opacity: 0 },
-    animate: { 
-      opacity: isFocused ? 1 : 0,
-      transition: { duration: 0.3, ease: "easeOut" }
-    },
-    exit: { opacity: 0 }
-  };
-
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Update mobile detection on resize and initial mount
+  // Mobile detection
   useEffect(() => {
     const updateMobileState = () => {
       if (typeof window !== 'undefined') {
@@ -200,23 +347,26 @@ export function Window({
             // zIndex removed - CSS handles active state with z-index: 1000
             ...style,
           }}
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ 
             opacity: 1, 
             scale: 1, 
             y: 0,
             transition: { 
-              duration: 0.3,
-              ease: [0.22, 1, 0.36, 1]
+              type: "spring",
+              stiffness: 300,
+              damping: 25
             }
           }}
           exit={{ 
             opacity: 0, 
-            scale: 0.95,
-            y: -20,
-            transition: { duration: 0.2 }
+            scale: 0.8,
+            transition: { 
+              duration: 0.2,
+              ease: "easeOut"
+            }
           }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.3 }}
           data-testid={`window-${id}`}
           onPointerDown={() => {
             handleFocus();
@@ -248,14 +398,28 @@ export function Window({
           )}
 
           {/* Window Header */}
-          <div
+          <motion.div
             ref={headerRef}
             className="window-header"
             onMouseDown={handleMouseDown}
+            onDoubleClick={handleDoubleClick}
             style={{ 
               cursor: isDragging ? 'grabbing' : 'move',
               zIndex: 20,
             }}
+            data-window-title
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ 
+              opacity: 1, 
+              y: 0,
+              transition: { 
+                delay: 0.05,
+                type: "spring",
+                stiffness: 400,
+                damping: 20
+              }
+            }}
+            exit={{ opacity: 0, y: -10 }}
           >
             {icon && <div className="window-header-icon">{icon}</div>}
             <div className="window-header-title">{title}</div>
@@ -268,6 +432,9 @@ export function Window({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 500, damping: 17 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
               >
                 <svg viewBox="0 0 16 16" fill="currentColor">
                   <path d="M0 7v2h16V7z" />
@@ -281,6 +448,9 @@ export function Window({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 500, damping: 17 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
               >
                 {isMaximizedState ? (
                   <svg viewBox="0 0 16 16" fill="currentColor">
@@ -300,30 +470,52 @@ export function Window({
                 whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.1)" }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 500, damping: 17 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
               >
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                   <path d="M1 1l14 14M15 1L1 15" />
                 </svg>
               </motion.button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Window Content */}
           <motion.div
             className="window-content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ 
-              delay: 0.1,
-              duration: 0.3,
-              ease: "easeOut"
+              delay: 0.15,
+              type: "spring",
+              stiffness: 250,
+              damping: 20
             }}
+            exit={{ opacity: 0, scale: 0.9 }}
             style={{
               pointerEvents: isMobile ? "none" : "auto",
             }}
           >
             {children}
           </motion.div>
+          
+          {/* Snap Preview Overlay */}
+          {snapPreview && (
+            <motion.div
+              className="absolute pointer-events-none border-2 border-dashed border-blue-400 bg-blue-500/10"
+              style={{
+                left: snapPreview.x,
+                top: snapPreview.y,
+                width: snapPreview.width,
+                height: snapPreview.height,
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.8 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
+          )}
         </motion.div>
       )}
     </AnimatePresence>
