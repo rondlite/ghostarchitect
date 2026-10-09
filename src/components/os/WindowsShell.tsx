@@ -355,6 +355,12 @@ export function WindowsShell({
                     setMinimizedWindows(prev => new Set([...prev, window.id]));
                   }
                 }}
+                onSnap={(snapType, position) => {
+                  // Handle snap event if needed
+                }}
+                onRestore={() => {
+                  // Handle restore event if needed
+                }}
                 defaultPosition={{ x: cascadeX, y: cascadeY }}
                 defaultSize={{ width: 640, height: 480 }}
               >
@@ -390,6 +396,12 @@ export function WindowsShell({
             onPointerDown={(id) => setActiveWindowId("messages")}
             onClose={() => {
               setMinimizedWindows(prev => new Set([...prev, "messages"]));
+            }}
+            onSnap={(snapType, position) => {
+              // Handle snap event if needed
+            }}
+            onRestore={() => {
+              // Handle restore event if needed
             }}
             defaultPosition={{ x: 720, y: 80 }}
             defaultSize={{ width: 420, height: 560 }}
