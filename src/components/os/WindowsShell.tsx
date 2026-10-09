@@ -384,6 +384,13 @@ export function WindowsShell({
             <path d="M8 2C4.5 2 1.5 4.5 0 8c1.5 3.5 4.5 6 8 6s6.5-2.5 8-6c-1.5-3.5-4.5-6-8-6z" fill="none" stroke="currentColor" strokeWidth="1" />
           </svg>
         }
+        powerIcon={
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M7.5 1h1v6h-1V1z" />
+            <path d="M4.2 3.2l.7.7A5 5 0 1 0 11.1 4l.7-.7A6 6 0 1 1 4.2 3.2z" />
+          </svg>
+        }
+        onExit={onExit}
       />
     </div>
   );

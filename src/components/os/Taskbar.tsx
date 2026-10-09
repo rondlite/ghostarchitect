@@ -25,6 +25,9 @@ export interface TaskbarProps {
   showClock?: boolean;
   networkIcon?: React.ReactNode;
   volumeIcon?: React.ReactNode;
+  powerIcon?: React.ReactNode;
+  onExit?: () => void;
+  onNetworkClick?: () => void;
   currentTime?: string;
   currentDate?: string;
 }
@@ -38,6 +41,9 @@ export function Taskbar({
   showClock = true,
   networkIcon = null,
   volumeIcon = null,
+  powerIcon = null,
+  onExit,
+  onNetworkClick,
   currentTime = "09:41",
   currentDate = "08/10/2026",
 }: TaskbarProps) {
@@ -226,6 +232,7 @@ export function Taskbar({
               className="system-tray-icon"
               aria-label="Network status"
               title="Network status"
+              onClick={onNetworkClick}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
@@ -250,6 +257,23 @@ export function Taskbar({
               whileTap={{ scale: 0.9 }}
             >
               {volumeIcon}
+            </motion.button>
+          )}
+
+          {powerIcon && onExit && (
+            <motion.button
+              className="system-tray-icon system-tray-power"
+              aria-label="Log out"
+              title="Log out"
+              onClick={onExit}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2 }}
+              whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.1)" }}
+              whileTap={{ scale: 0.9 }}
+            >
+              {powerIcon}
             </motion.button>
           )}
         </AnimatePresence>

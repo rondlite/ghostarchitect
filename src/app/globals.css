@@ -1136,3 +1136,26 @@ body {
     animation: scan 2s linear infinite;
   }
 }
+
+/* System tray buttons (wifi, volume, power) */
+.taskbar .system-tray-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted, inherit);
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+.taskbar .system-tray-icon:hover {
+  background: rgba(255,255,255,0.12);
+  color: var(--text-primary, inherit);
+}
+.taskbar .system-tray-icon:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

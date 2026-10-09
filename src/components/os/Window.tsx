@@ -91,7 +91,12 @@ export function Window({
 
   // Handle drag functionality
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.target !== headerRef.current || windowRef.current?.classList.contains('maximized')) {
+    // Only initiate drag from the header bar itself (not its buttons/controls)
+    if (windowRef.current?.classList.contains('maximized')) {
+      return;
+    }
+    const target = e.target as HTMLElement;
+    if (!headerRef.current?.contains(target) || target.closest('button')) {
       return;
     }
 
