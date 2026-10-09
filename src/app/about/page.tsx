@@ -134,7 +134,7 @@ export default function AboutPage() {
           className="text-center font-mono text-[9px] tracking-widest uppercase pt-4"
           style={{ color: "rgba(255,255,255,0.15)" }}
         >
-          &copy; 2026 Ghost Architect &middot; Demandcluster &middot; Technical Simulation v2.4.0
+          &copy; 2026 Ghost Architect &middot; Technical Simulation v2.4.0
         </motion.div>
       </div>
     </div>

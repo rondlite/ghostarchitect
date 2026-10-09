@@ -119,8 +119,8 @@ export default function TermsPage() {
         {/* Parties */}
         <motion.div custom={4} initial="hidden" animate="visible" variants={stagger}>
           <P>
-            These Terms are between <strong className="text-white">Demandcluster B.V.</strong>, registered in the Netherlands,
-            Diemen (&ldquo;Demandcluster&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) — and the individual registering a
+            These Terms are between <strong className="text-white">Ron van Etten</strong>, registered in the Netherlands,
+            Hellevoetsluis (&ldquo;Ron van Etten&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) — and the individual registering a
             Trainer account (&ldquo;Trainer&rdquo;, &ldquo;you&rdquo;).
           </P>
         </motion.div>
@@ -245,7 +245,7 @@ export default function TermsPage() {
         <Section i={11} title="6. Intellectual Property">
           <P>
             The Platform, simulation content, and all associated materials remain the intellectual property of
-            Demandcluster B.V. You may not extract, copy, or redistribute simulation content outside of normal
+            Ron van Etten. You may not extract, copy, or redistribute simulation content outside of normal
             Platform use. Branding assets you upload to customise your Team (logos, names) remain your property.
           </P>
         </Section>
@@ -263,7 +263,7 @@ export default function TermsPage() {
         {/* 8. Limitation of Liability */}
         <Section i={13} title="8. Limitation of Liability">
           <P>
-            To the maximum extent permitted by Dutch law, Demandcluster B.V. and its contributors are not liable for
+            To the maximum extent permitted by Dutch law, Ron van Etten is not liable for
             any direct, indirect, incidental, or consequential damages arising from your use of, or inability to use,
             the Platform. The Platform is provided &ldquo;as is&rdquo; without warranty of any kind.
           </P>
@@ -306,9 +306,9 @@ export default function TermsPage() {
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
           >
             <P>
-              <strong className="text-white">Demandcluster B.V.</strong>
+              <strong className="text-white">Ron van Etten</strong>
             </P>
-            <P>Diemen, Netherlands</P>
+            <P>Hellevoetsluis, Netherlands</P>
             <P>
               <a
                 href="mailto:enquiries@ghostarchitectgame.com"
@@ -332,7 +332,7 @@ export default function TermsPage() {
           className="text-center font-mono text-[9px] tracking-widest uppercase pt-2"
           style={{ color: "rgba(255,255,255,0.15)" }}
         >
-          &copy; 2026 Ghost Architect &middot; Demandcluster B.V. &middot; Diemen, Netherlands
+          &copy; 2026 Ghost Architect &middot; Ron van Etten &middot; Hellevoetsluis, Netherlands
         </motion.div>
 
       </div>
