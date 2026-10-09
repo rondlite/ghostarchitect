@@ -105,7 +105,8 @@ export function Window({
     const startY = e.clientY - position.y;
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
+      // NOTE: do not read the isDragging state here — it is a stale closure
+      // value (false) at drag start. These listeners only exist mid-drag.
 
       const desktop = document.querySelector('.desktop');
       if (!desktop) return;
