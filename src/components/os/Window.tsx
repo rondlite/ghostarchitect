@@ -276,8 +276,8 @@ export function Window({
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 500, damping: 17 }}
               >
-                <svg viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M0 1l15 15m0-15L0 16" />
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="M1 1l14 14M15 1L1 15" />
                 </svg>
               </motion.button>
             </div>
